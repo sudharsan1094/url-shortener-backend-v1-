@@ -15,7 +15,6 @@ public class AuthController {
 
     private final UserRepository userRepo;
     private final JwtUtil jwtUtil;
-
     private final PasswordEncoder encoder;
 
     public AuthController(UserRepository userRepo, JwtUtil jwtUtil, PasswordEncoder encoder) {
@@ -24,12 +23,17 @@ public class AuthController {
         this.encoder = encoder;
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
 
         user.setPassword(encoder.encode(user.getPassword()));
+
+        if (user.getRole() == null) {
+            user.setRole("ROLE_USER");
+        }
+
         userRepo.save(user);
+
         return ResponseEntity.ok("User registered");
     }
 
@@ -38,11 +42,15 @@ public class AuthController {
 
         Optional<User> dbUser = userRepo.findByUsername(user.getUsername());
 
-        if (dbUser.isEmpty() || !encoder.matches(user.getPassword(), dbUser.get().getPassword())) {
+        if (dbUser.isEmpty() ||
+                !encoder.matches(user.getPassword(), dbUser.get().getPassword())) {
             return ResponseEntity.badRequest().body("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(
+                dbUser.get().getUsername(),
+                dbUser.get().getRole()
+        );
 
         return ResponseEntity.ok(token);
     }
