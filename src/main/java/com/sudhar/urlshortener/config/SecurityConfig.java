@@ -34,9 +34,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/{shortCode}").permitAll()
+
+                        // Public redirect endpoint (short URLs)
+                        .requestMatchers("/*").permitAll()
+
+                        // USER protected
                         .requestMatchers("/shorten").hasRole("USER")
+
+                        // ADMIN protected
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
 
