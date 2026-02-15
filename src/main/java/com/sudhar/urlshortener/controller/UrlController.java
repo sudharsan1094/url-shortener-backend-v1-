@@ -1,6 +1,5 @@
 package com.sudhar.urlshortener.controller;
 
-import com.sudhar.urlshortener.cache.UrlCacheService;
 import com.sudhar.urlshortener.entity.Url;
 import com.sudhar.urlshortener.service.UrlService;
 import org.springframework.http.ResponseEntity;
@@ -13,34 +12,31 @@ import java.util.Optional;
 public class UrlController {
 
     private final UrlService urlService;
-    private final UrlCacheService cache;
 
-    public UrlController(UrlService urlService, UrlCacheService cache) {
+    public UrlController(UrlService urlService) {
         this.urlService = urlService;
-        this.cache = cache;
     }
 
+    // 🔹 CREATE SHORT URL
     @PostMapping("/shorten")
     public String create(@RequestParam String url) {
-        return urlService.createShortUrl(url);
+
+        String shortCode = urlService.createShortUrl(url);
+
+        return "http://localhost:8080/" + shortCode;
     }
 
+    // 🔹 REDIRECT
     @GetMapping("/{shortCode}")
     public ResponseEntity<?> redirect(@PathVariable String shortCode) {
 
-        Url url = cache.get(shortCode);
+        Optional<Url> urlOptional = urlService.getByShortCode(shortCode);
 
-        if (url == null) {
-
-            Optional<Url> urlOptional = urlService.getByShortCode(shortCode);
-
-            if (urlOptional.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            url = urlOptional.get();
-            cache.put(shortCode, url);
+        if (urlOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        Url url = urlOptional.get();
 
         urlService.increaseClickCount(url);
 

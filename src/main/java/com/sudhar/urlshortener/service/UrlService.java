@@ -33,7 +33,7 @@ public class UrlService {
         urlRepository.save(url);
 
         // put into cache immediately
-        urlCacheService.put(shortCode, url);
+//        urlCacheService.put(shortCode, url);
 
         System.out.println("CREATED -> " + shortCode);
 
