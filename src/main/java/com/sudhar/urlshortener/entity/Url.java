@@ -2,10 +2,11 @@ package com.sudhar.urlshortener.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "urls")
-public class Url {
+public class Url implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
